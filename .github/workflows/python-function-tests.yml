@@ -1,0 +1,34 @@
+name: Python function tests
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version declared by the functions in the calling repo
+        type: string
+        default: "3.12"
+      requirements:
+        description: Space-separated requirements files to install before running pytest
+        type: string
+        default: requirements-dev.txt
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install dependencies
+        env:
+          REQUIREMENTS: ${{ inputs.requirements }}
+        run: |
+          for file in $REQUIREMENTS; do
+            pip install -r "$file"
+          done
+      - name: Run tests
+        run: pytest -v
